@@ -1,5 +1,12 @@
 package io.github.jackmacca06.ggtlifesteal;
 
+import com.mojang.serialization.Codec;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentTarget;
+import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.*;
@@ -14,6 +21,9 @@ import net.minecraft.world.item.ItemStack;
 import java.util.*;
 
 public final class CombatRules {
+    private static final AttachmentType<Boolean> RETURN_TO_SPAWN = AttachmentRegistry.create(
+            Identifier.fromNamespaceAndPath(Ggtlifesteal.MOD_ID, "combat_logout_return"),
+            builder -> builder.initializer(() -> false).persistent(Codec.BOOL).copyOnDeath());
     private static final long DURATION_NANOS = 60_000_000_000L;
     private static final Map<UUID, Long> UNTIL = new java.util.concurrent.ConcurrentHashMap<>();
     private static final Map<UUID, Integer> DISPLAYED = new HashMap<>();
@@ -26,6 +36,24 @@ public final class CombatRules {
             UNTIL.clear(); DISPLAYED.clear(); EXEMPT_DISCONNECT.clear(); stopping = false;
         });
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> stopping = true);
+        ServerPlayConnectionEvents.JOIN.register((listener, sender, server) -> {
+            ServerPlayer player = listener.player;
+            AttachmentTarget data = (AttachmentTarget) player;
+            if (!data.getAttachedOrCreate(RETURN_TO_SPAWN)) return;
+            // Resolve the bed/anchor safely after reconnect, never move a player
+            // between dimensions while PlayerList is saving/removing them.
+            TeleportTransition destination = player.findRespawnPositionAndUseSpawnBlock(
+                    true, TeleportTransition.DO_NOTHING);
+            if (EndRules.denied(player, destination.newLevel())) {
+                destination = TeleportTransition.createDefault(player, TeleportTransition.DO_NOTHING);
+            }
+            player.stopRiding();
+            if (player.teleport(destination) != null) {
+                data.setAttached(RETURN_TO_SPAWN, false);
+                player.resetFallDistance();
+                player.sendSystemMessage(Component.literal("You were returned to your spawn point for logging out during combat."));
+            }
+        });
         ServerLivingEntityEvents.AFTER_DAMAGE.register((entity, source, before, taken, blocked) -> {
             if (entity instanceof ServerPlayer victim && taken > 0) tagHit(victim, source);
         });
@@ -67,6 +95,8 @@ public final class CombatRules {
                 HeartRewards.drop(player, stack);
             }
             if (HeartData.loseHeart(player)) HeartRewards.drop(player, new ItemStack(Ggtlifesteal.HEART));
+            // Saved by PlayerList immediately after this callback, including across restarts.
+            ((AttachmentTarget) player).setAttached(RETURN_TO_SPAWN, true);
     }
 
     private static void tagHit(ServerPlayer victim, DamageSource source) {
