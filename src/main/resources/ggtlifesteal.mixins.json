@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.jackmacca06.ggtlifesteal.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "EndTravelMixin",
+    "ArmorSlotMixin",
+    "EquippableMixin",
+    "DispenserEquipmentMixin",
+    "ProjectileLaunchMixin",
+    "WardenDamageMixin",
+    "PlayerDepartureMixin",
+    "DeathAttributionMixin",
+    "ShriekerProtectionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

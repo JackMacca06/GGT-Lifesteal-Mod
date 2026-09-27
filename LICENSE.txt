@@ -1,0 +1,2 @@
+Copyright (c) 2026 Jack McPherson
+All rights reserved.

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["MMM", "MPM", "MMM"],
+  "key": {
+    "M": "minecraft:phantom_membrane",
+    "P": "minecraft:poisonous_potato"
+  },
+  "result": {
+    "id": "ggtlifesteal:makeshift_heart",
+    "count": 1
+  }
+}

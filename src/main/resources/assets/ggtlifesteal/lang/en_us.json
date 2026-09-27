@@ -1,0 +1,11 @@
+{
+  "item.ggtlifesteal.heart": "Heart",
+  "tooltip.ggtlifesteal.heart.use": "Right-click to gain 1 permanent heart.",
+  "tooltip.ggtlifesteal.heart.limit": "Maximum: %s hearts.",
+  "message.ggtlifesteal.heart_limit": "You already have %s hearts.",
+  "message.ggtlifesteal.heart_added": "Heart added! %s/%s hearts.",
+  "item.ggtlifesteal.makeshift_heart": "Makeshift Heart",
+  "tooltip.ggtlifesteal.makeshift_heart": "Can restore hearts of a weakened player (<10 Hearts)",
+  "message.ggtlifesteal.makeshift_limit": "Makeshift Hearts only work below 10 hearts.",
+  "message.ggtlifesteal.makeshift_added": "Heart restored! %s/10 hearts."
+}

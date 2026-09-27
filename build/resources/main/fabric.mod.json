@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "ggtlifesteal",
+  "version": "0.1-DEV",
+  "name": "GGTLifesteal",
+  "description": "A lifesteal mod for the GGT Lifesteal SMP",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/ggtlifesteal/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "io.github.jackmacca06.ggtlifesteal.client.GgtlifestealDataGenerator"
+    ],
+    "client": [
+      "io.github.jackmacca06.ggtlifesteal.client.GgtlifestealClient"
+    ],
+    "main": [
+      "io.github.jackmacca06.ggtlifesteal.Ggtlifesteal"
+    ]
+  },
+  "mixins": [
+    "ggtlifesteal.mixins.json",
+    {
+      "config": "ggtlifesteal.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "fabric-api": "*",
+    "minecraft": "26.3"
+  }
+}
