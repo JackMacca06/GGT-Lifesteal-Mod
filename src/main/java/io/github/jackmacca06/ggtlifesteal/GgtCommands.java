@@ -16,7 +16,7 @@ public final class GgtCommands {
                 dispatcher.register(Commands.literal("ggtls")
                         .executes(c -> {
                             c.getSource().sendSuccess(() -> Component.literal(
-                                    "/ggtls withdraw_heart <count> | claim_hearts | status; OP: set_hearts <player> <count> | release_end | limit_playtime <hours>"), false);
+                                    "/ggtls withdraw_heart <count> | claim_hearts | status; OP: set_hearts <player> <count> | release_end | release_nether | release_enchants | start_fury_event | limit_playtime <hours>"), false);
                             return 1;
                         })
                         .then(Commands.literal("withdraw_heart")
@@ -37,6 +37,31 @@ public final class GgtCommands {
                                                     player.sendSystemMessage(Component.literal("Your heart capacity was set to " + count + "."));
                                                     return 1;
                                                 }))))
+                        .then(Commands.literal("start_fury_event").requires(GgtCommands::operator)
+                                .executes(c -> {
+                                    boolean started = FuryVaultRules.start(c.getSource().getServer(), true);
+                                    if (!started) return fail(c.getSource(), "No event started: an event is active, the queue is empty, or no safe spawn location exists.");
+                                    c.getSource().sendSuccess(() -> Component.literal("Dragon's Fury vault placed. The 10-minute countdown has begun."), true);
+                                    return 1;
+                                }))
+                        .then(Commands.literal("release_enchants").requires(GgtCommands::operator)
+                                .executes(c -> {
+                                    boolean open = ModState.enchantsOpen(c.getSource().getServer());
+                                    ModState.releaseEnchants(c.getSource().getServer());
+                                    c.getSource().sendSuccess(() -> Component.translatable(open
+                                            ? "message.ggtlifesteal.enchants_already_open"
+                                            : "message.ggtlifesteal.enchants_released"), true);
+                                    return 1;
+                                }))
+                        .then(Commands.literal("release_nether").requires(GgtCommands::operator)
+                                .executes(c -> {
+                                    boolean open = ModState.netherOpen(c.getSource().getServer());
+                                    ModState.releaseNether(c.getSource().getServer());
+                                    c.getSource().sendSuccess(() -> Component.translatable(open
+                                            ? "message.ggtlifesteal.nether_already_open"
+                                            : "message.ggtlifesteal.nether_released"), true);
+                                    return 1;
+                                }))
                         .then(Commands.literal("release_end").requires(GgtCommands::operator)
                                 .executes(c -> {
                                     boolean alreadyOpen = ModState.endOpen(c.getSource().getServer());

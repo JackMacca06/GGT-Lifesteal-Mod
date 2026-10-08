@@ -13,6 +13,7 @@ public abstract class PlayerDepartureMixin {
     @Inject(method = "remove", at = @At("HEAD"))
     private void ggtls$beforeSave(ServerPlayer player, CallbackInfo ci) {
         CombatRules.onDisconnect(player);
+        io.github.jackmacca06.ggtlifesteal.LocatorRules.onDisconnect(player);
         PlaytimeRules.onDisconnect(player);
     }
 }

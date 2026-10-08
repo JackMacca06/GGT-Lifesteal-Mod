@@ -27,13 +27,14 @@ public final class CombatRules {
     private static final long DURATION_NANOS = 60_000_000_000L;
     private static final Map<UUID, Long> UNTIL = new java.util.concurrent.ConcurrentHashMap<>();
     private static final Map<UUID, Integer> DISPLAYED = new HashMap<>();
+    private static final Map<UUID, Long> DISPLAYED_AT = new HashMap<>();
     private static final Set<UUID> EXEMPT_DISCONNECT = new HashSet<>();
     private static boolean stopping;
 
     private CombatRules() {}
     public static void initialize() {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            UNTIL.clear(); DISPLAYED.clear(); EXEMPT_DISCONNECT.clear(); stopping = false;
+            UNTIL.clear(); DISPLAYED.clear(); DISPLAYED_AT.clear(); EXEMPT_DISCONNECT.clear(); stopping = false;
         });
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> stopping = true);
         ServerPlayConnectionEvents.JOIN.register((listener, sender, server) -> {
@@ -45,7 +46,7 @@ public final class CombatRules {
             TeleportTransition destination = player.findRespawnPositionAndUseSpawnBlock(
                     true, TeleportTransition.DO_NOTHING);
             if (EndRules.denied(player, destination.newLevel())) {
-                destination = TeleportTransition.createDefault(player, TeleportTransition.DO_NOTHING);
+                destination = EndRules.overworldSpawn(player);
             }
             player.stopRiding();
             if (player.teleport(destination) != null) {
@@ -59,14 +60,17 @@ public final class CombatRules {
         });
         EntityElytraEvents.ALLOW.register(entity -> !(entity instanceof Player p) || !active(p));
         ServerTickEvents.END_SERVER_TICK.register(server -> {
+            long now = System.nanoTime();
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 int seconds = secondsLeft(player);
                 Integer previous = DISPLAYED.get(player.getUUID());
                 if (seconds > 0) {
                     player.stopFallFlying();
-                    if (previous == null || previous != seconds) {
+                    if (previous == null || previous != seconds
+                            || now - DISPLAYED_AT.getOrDefault(player.getUUID(), 0L) >= 1_000_000_000L) {
                         player.sendOverlayMessage(Component.literal("IN COMBAT: " + seconds).withStyle(ChatFormatting.RED));
                         DISPLAYED.put(player.getUUID(), seconds);
+                        DISPLAYED_AT.put(player.getUUID(), now);
                     }
                 } else if (previous != null) {
                     player.sendOverlayMessage(Component.literal("You are no longer in combat.").withStyle(ChatFormatting.GREEN));
@@ -82,6 +86,7 @@ public final class CombatRules {
             boolean punish = !stopping && !exempt && active(player) && player.isAlive();
             clear(player);
             if (!punish) return;
+            FuryRules.onCombatLogout(player);
 
             // Remove each original stack before spawning its single replacement in the world.
             ItemStack cursor = player.containerMenu.getCarried();
@@ -115,6 +120,10 @@ public final class CombatRules {
         DISPLAYED.remove(player.getUUID());
         player.stopFallFlying();
     }
+    public static void refreshProximity(ServerPlayer player) {
+        UNTIL.put(player.getUUID(), System.nanoTime() + DURATION_NANOS);
+        player.stopFallFlying();
+    }
     public static int secondsLeft(Player player) {
         Long deadline = UNTIL.get(player.getUUID());
         if (deadline == null) return 0;
@@ -126,5 +135,7 @@ public final class CombatRules {
         return entity instanceof Player player && active(player) && stack.has(DataComponents.GLIDER);
     }
     public static void exemptDisconnect(ServerPlayer player) { EXEMPT_DISCONNECT.add(player.getUUID()); }
-    private static void clear(Player player) { UNTIL.remove(player.getUUID()); DISPLAYED.remove(player.getUUID()); }
+    private static void clear(Player player) {
+        UNTIL.remove(player.getUUID()); DISPLAYED.remove(player.getUUID()); DISPLAYED_AT.remove(player.getUUID());
+    }
 }

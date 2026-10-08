@@ -15,7 +15,7 @@ Each death removes one heart of capacity, down to the minimum of three:
 
 ### Heart item
 
-The regular Heart uses an enchanted Nether Star appearance with a red name. Right-clicking consumes it instantly, adds one heart of capacity and fills the new heart. It plays the respawn-anchor charging sound.
+The regular Heart uses a red custom heart head, a red name and an enchanted glint. Right-clicking consumes it instantly, adds one heart of capacity and fills the new heart. It plays the respawn-anchor charging sound.
 
 At 20 hearts, use is rejected with a message above the hotbar and the item is not consumed. Creative use does not consume the item.
 
@@ -33,7 +33,7 @@ Membrane  Potato    Membrane
 Membrane  Membrane  Membrane
 ```
 
-Makeshift Hearts have a green name, use the vanilla conduit appearance and play a crunchy bone-block sound. Each restores one heart of capacity when the player has **3–9 hearts**, stopping at 10. They are not consumed when the player is already at 10 or more.
+Makeshift Hearts have a green name, use a mouldy custom heart head and play a crunchy bone-block sound. Each restores one heart of capacity when the player has **3–9 hearts**, stopping at 10. They are not consumed when the player is already at 10 or more.
 
 Capacity restored with Makeshift Hearts cannot be withdrawn into regular Heart items. Death rewards always generate regular Hearts.
 
@@ -55,15 +55,21 @@ Normal server shutdowns and kicks issued by this mod's playtime limiter are exem
 
 ## World progression
 
-### End access
+### Dimension access
 
 The End is locked until an operator runs `/ggtls release_end`. The unlock is saved for that world and survives restarts.
+
+The Nether is independently locked until `/ggtls release_nether`. This applies to existing saves too. Players joining in a locked dimension are returned to Overworld spawn.
+
+### Enchanting
+
+Enchanting starts locked until `/ggtls release_enchants`. Enchanting tables cannot be crafted or used, including crafting through automated crafters. Anvils allow repairs and renaming that preserve enchantments, but reject results that add or upgrade enchantments. Enchanted books can still be collected. The unlock survives restarts.
 
 ### Maces and Wardens
 
 The mace recipe requires bedrock, making it unavailable through normal Survival crafting. Instead, Wardens drop **one mace per kill** when mob loot is enabled.
 
-Projectiles fired before a Warden becomes angry deal **95% less damage** to it. This uses the Warden's anger state when the projectile is fired, so a shot does not gain full damage merely because it provokes the Warden before impact.
+Wardens take **95% less damage from all projectiles**, regardless of anger or range. Shooting from outside sonic-boom range does not bypass this protection.
 
 ### Ancient City maps
 
@@ -76,6 +82,50 @@ Already-generated villager offers and previously purchased maps are unchanged. N
 ### Sculk shriekers
 
 Sculk shriekers cannot be mined in Survival and are protected from explosion damage. This applies to natural and player-placed shriekers. Creative players can still break them.
+
+## Locator Compass
+
+A reusable player tracker with a fixed, enchanted Recovery Compass appearance. Right-click to choose an online player from a head menu and confirm spending one **Tracking Charge** for five minutes.
+
+Both recipes use redstone blocks above and below the centre, emerald blocks left and right, and empty corners. Use a compass in the centre for a Locator Compass; use a lapis block for one Tracking Charge, shown as an enchanted echo shard.
+
+The top-centre boss bar shows `Tracking: PLAYER | Distance: XXXm | 04m32s`. Distance is a straight line including height. Across dimensions it shows, for example, `Distance: ? (NETHER)`, while the timer continues.
+
+The target receives “you feel as if you're being watched...” at activation and once per minute. Multiple seekers share that warning interval. Within 100 blocks in the same dimension, both players' combat timers continually refresh to one minute. Normal combat and logout rules apply.
+
+The active compass stays locked in the seeker's inventory. Targets cannot be switched mid-session. Right-click again to confirm cancellation, forfeiting the charge. Seeker death or logout ends the session without refund; target death does not. Target logout refunds one charge, dropping it at the seeker's feet if necessary. A normal server shutdown refunds funded sessions on the next join.
+
+## Dragon's Fury
+
+A reusable, bound potion worth fighting over. Craft it at a crafting table:
+
+```text
+Empty          Dragon Egg    Empty
+Diamond Block  Glass Bottle  Diamond Block
+Empty          Blaze Powder  Empty
+```
+
+Drinking grants **Fire Resistance, Speed I and Strength I for five minutes**, including in PvP. Its ten-minute cooldown starts when drinking finishes, persists through restarts and pauses while its owner is offline. It looks like Dragon's Breath when ready and a filled grey potion on cooldown, with the remaining time in its tooltip.
+
+Multiple potions can exist, but each player can own only one, including a pending transfer. Attempting to craft another consumes no ingredients and inflicts Poison I and Blindness for ten seconds. Automated crafters cannot create unbound potions.
+
+The potion can be moved within its owner's inventory but cannot be dropped, stored or handed away. A player-credited kill transfers ownership to the killer and resets its cooldown. If their inventory is full, it waits for the first free slot. If they already own a potion, the victim's potion becomes a dropped bundle containing its egg, bottle, two diamond blocks and blaze powder.
+
+### Spawn vault events
+
+Environmental deaths and combat logouts send the potion to a custom ominous vault at spawn. Its arrival is announced in chat. A floating ten-minute timer and green-to-red bar remain visible through walls within rendering range.
+
+The vault appears above the highest usable surface in a 3×3 chunk area centred on Overworld spawn, including player-built platforms. Dry land is preferred; entirely watery spawn areas permit placement above water. It cannot be broken, exploded, pushed or accessed with keys or hoppers. Surrounding blocks remain editable.
+
+After the timer expires, the first player to right-click with inventory space claims the potion and becomes its owner, with a fresh cooldown. A player already owning one receives its raw materials in a bundle instead. Full inventories receive a warning without consuming the reward.
+
+Events run one at a time in queue order, with a fresh ten-minute timer for each. Queue and timer persist through restarts and pause when nobody is online. If no safe placement exists, the event waits for an operator to clear space and run `/ggtls start_fury_event`.
+
+## Vault Restocks
+
+Surround one ominous trial key with eight trial keys to craft **Vault Restock**, shown as a red crate head. Reverse the keys for **Ominous Vault Restock**, shown as a blue crate head.
+
+Right-click a matching vault to reset your own previous claim instantly. One item is consumed and a matching key is still needed to unlock the vault again. Other players' claims are unchanged. Wrong-type, unclaimed and currently-dispensing vaults reject the item without consuming it.
 
 ## Daily playtime limits
 
@@ -100,6 +150,9 @@ The allowance resets at **midnight ACST, fixed UTC+09:30**. It does not follow A
 | `/ggtls claim_hearts` | Everyone | Claim stored kill rewards up to available inventory space. |
 | `/ggtls set_hearts <player> <count>` | Operator | Set an online player's permanent capacity to 3–20 hearts. Does not heal existing injuries; lowering capacity clamps current health. |
 | `/ggtls release_end` | Operator | Unlock the End for the world. |
+| `/ggtls release_nether` | Operator | Unlock the Nether for the world. |
+| `/ggtls release_enchants` | Operator | Unlock enchanting tables and anvil enchanting. |
+| `/ggtls start_fury_event` | Operator | Retry a queued Fury event after clearing a safe spawn location. |
 | `/ggtls limit_playtime <hours>` | Operator | Set the daily allowance; 0 disables the limit. |
 
 Examples:

@@ -8,11 +8,21 @@
     "ArmorSlotMixin",
     "EquippableMixin",
     "DispenserEquipmentMixin",
-    "ProjectileLaunchMixin",
     "WardenDamageMixin",
     "PlayerDepartureMixin",
     "DeathAttributionMixin",
-    "ShriekerProtectionMixin"
+    "ShriekerProtectionMixin",
+    "VaultServerDataAccessor",
+    "EnchantCraftingMixin",
+    "EnchantCrafterMixin",
+    "EnchantAnvilMixin",
+    "LockedInventoryMixin",
+    "LockedDropMixin",
+    "FuryVaultTypeMixin",
+    "FuryTextAccessor",
+    "FuryDisplayAccessor",
+    "FuryDropMixin",
+    "LockedCreativeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

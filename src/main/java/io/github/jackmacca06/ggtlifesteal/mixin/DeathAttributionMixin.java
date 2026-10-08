@@ -12,5 +12,6 @@ public abstract class DeathAttributionMixin {
     @Inject(method = "die", at = @At("HEAD"))
     private void ggtls$captureCredit(DamageSource source, CallbackInfo ci) {
         HeartRewards.captureDeath((ServerPlayer) (Object) this);
+        io.github.jackmacca06.ggtlifesteal.FuryRules.onDeath((ServerPlayer) (Object) this);
     }
 }

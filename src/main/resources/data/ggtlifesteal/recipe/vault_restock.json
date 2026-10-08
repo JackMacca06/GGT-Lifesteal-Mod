@@ -1,0 +1,17 @@
+{
+  "result": {
+    "count": 1,
+    "id": "ggtlifesteal:vault_restock"
+  },
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "KKK",
+    "KCK",
+    "KKK"
+  ],
+  "category": "misc",
+  "key": {
+    "C": "minecraft:ominous_trial_key",
+    "K": "minecraft:trial_key"
+  }
+}
