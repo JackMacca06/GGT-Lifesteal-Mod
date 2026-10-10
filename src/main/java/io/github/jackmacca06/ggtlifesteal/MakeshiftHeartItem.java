@@ -23,7 +23,7 @@ public final class MakeshiftHeartItem extends Item {
         }
         player.getItemInHand(hand).consume(1, player);
         level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                SoundEvents.BONE_BLOCK_BREAK, SoundSource.PLAYERS, 0.8F, 0.7F);
+                SoundEvents.NAUTILUS_SADDLE_EQUIP.value(), SoundSource.PLAYERS, 0.8F, 1.0F);
         player.sendOverlayMessage(Component.translatable("message.ggtlifesteal.makeshift_added",
                 HeartData.getHearts(serverPlayer)).withStyle(ChatFormatting.GREEN));
         return InteractionResult.SUCCESS;

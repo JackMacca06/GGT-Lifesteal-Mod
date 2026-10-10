@@ -30,6 +30,15 @@ public final class FuryItem extends Item {
     @Override public boolean canFitInsideContainerItems() { return false; }
     @Override public int getUseDuration(ItemStack stack, LivingEntity entity) { return 32; }
     @Override public ItemUseAnimation getUseAnimation(ItemStack stack) { return ItemUseAnimation.DRINK; }
+    @Override public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remainingTicks) {
+        // Broadcast from the server once, so the drinker and nearby players hear the same gulps.
+        if (!level.isClientSide() && remainingTicks > 0 && remainingTicks < 32 && remainingTicks % 4 == 0) {
+            level.playSound(null, entity.getX(), entity.getY(), entity.getZ(),
+                    net.minecraft.sounds.SoundEvents.GENERIC_DRINK.value(),
+                    net.minecraft.sounds.SoundSource.PLAYERS, 0.5F,
+                    0.9F + entity.getRandom().nextFloat() * 0.1F);
+        }
+    }
     @Override public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (player.isSpectator() || !player.isAlive()) return InteractionResult.PASS;
         if (player instanceof ServerPlayer serverPlayer && !FuryRules.canDrink(serverPlayer, player.getItemInHand(hand)))
